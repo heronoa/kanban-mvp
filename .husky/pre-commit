@@ -1,0 +1,7 @@
+echo "Linting backend..."
+cd backend && npm run lint || exit 1
+cd ..
+
+echo "Linting frontend..."
+cd frontend && npm run lint || exit 1
+cd ..
