@@ -1,0 +1,109 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  backend:
+    name: Backend Tests and Analysis
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            backend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./backend
+
+      - name: Set up Database URL
+        run: echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5434/test_db" >> $GITHUB_ENV
+
+      - name: Run db migrations
+        run: |
+          npx prisma migrate deploy --schema=src/infrastructure/database/prisma/schema.prisma
+          npx prisma generate --schema=src/infrastructure/database/prisma/schema.prisma
+        working-directory: ./backend
+
+      - name: Run Integration Tests
+        run: npm run test:integration
+        working-directory: ./backend
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+        working-directory: ./backend
+
+  frontend:
+    name: Frontend Tests and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            backend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Run Tests
+        run: npm run test
+        working-directory: ./frontend
+
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./frontend
