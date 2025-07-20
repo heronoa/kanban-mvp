@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    container_name: kanban-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: kanban
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  db-test:
+    image: postgres:15
+    restart: always
+    container_name: kanban-db-test
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: kanban
+    ports:
+      - '5434:5432'
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+
+  loki:
+    image: grafana/loki:2.9.2
+    ports:
+      - '3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    ports:
+      - '3300:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  redis:
+    image: redis
+    container_name: rune_redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data/redis
+volumes:
+  pgdata:
+  pgdata-test: 
+  grafana-storage:
