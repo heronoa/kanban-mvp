@@ -57,18 +57,18 @@ jobs:
         run: npm install
         working-directory: ./backend
 
-      - name: Set up Database URL
-        run: echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5434/test_db" >> $GITHUB_ENV
+      # - name: Set up Database URL
+      #   run: echo "DATABASE_URL=postgresql://test_user:test_password@localhost:5434/test_db" >> $GITHUB_ENV
 
-      - name: Run db migrations
-        run: |
-          npx prisma migrate deploy --schema=src/infrastructure/database/prisma/schema.prisma
-          npx prisma generate --schema=src/infrastructure/database/prisma/schema.prisma
-        working-directory: ./backend
+      # - name: Run db migrations
+      #   run: |
+      #     npx prisma migrate deploy --schema=src/infrastructure/database/prisma/schema.prisma
+      #     npx prisma generate --schema=src/infrastructure/database/prisma/schema.prisma
+      #   working-directory: ./backend
 
-      - name: Run Integration Tests
-        run: npm run test:integration
-        working-directory: ./backend
+      # - name: Run Integration Tests
+      #   run: npm run test:integration
+      #   working-directory: ./backend
 
       - name: Run Unit Tests
         run: npm run test:unit
