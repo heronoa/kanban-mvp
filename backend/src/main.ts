@@ -105,15 +105,21 @@ function configureHelmet(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  configureCors(app);
-  setGlobalPrefix(app);
-  setupSwagger(app);
-  useGlobalPipes(app);
-  useGlobalFilters(app);
-  configureHelmet(app);
+  try {
+    const app = await NestFactory.create(AppModule);
+    configureCors(app);
+    setGlobalPrefix(app);
+    setupSwagger(app);
+    useGlobalPipes(app);
+    useGlobalFilters(app);
+    configureHelmet(app);
 
-  await app.listen(process.env.PORT ?? 3000);
+    await app.listen(process.env.PORT ?? 3000);
+    console.log(`Application is running on: ${await app.getUrl()}`);
+  } catch (error) {
+    console.error('Failed to start the application:', error);
+    process.exit(1);
+  }
 }
 
 void bootstrap();
