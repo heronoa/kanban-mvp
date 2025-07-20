@@ -38,7 +38,7 @@ export function createLocalLogger(): Logger {
         format: baseFormat,
       }),
       new transports.DailyRotateFile({
-        filename: 'logs/%DATE%-sucess.log',
+        filename: 'logs/%DATE%-success.log',
         level: 'info',
         datePattern: 'YYYY-MM-DD',
         zippedArchive: true,
